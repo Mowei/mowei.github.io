@@ -52,7 +52,8 @@
         // 畫外框
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(pos.x, pos.y, frameW, frameH);
-        ctx.strokeStyle = "#ccc";
+        //ctx.strokeStyle = "#ccc";
+		ctx.strokeStyle = "#fff";
         ctx.strokeRect(pos.x, pos.y, frameW, frameH);
 
         // 圖片區域位置
@@ -68,8 +69,8 @@
     }
 
     function drawCutLines() {
-      ctx.strokeStyle = "#999";
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#DDD";
+      ctx.lineWidth = 1;
       ctx.setLineDash([10, 10]);
 
       // 垂直中心線
