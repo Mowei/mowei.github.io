@@ -28,14 +28,11 @@
 	
 	const canvasW = productW - (bleed * 2); // 1160
 	const canvasH = productH - (bleed * 2); // 1760
-    //const canvasW = 1200;
-    //const canvasH = 1800;
 
-    // 分成 2x2 格，每格 600x900 px
+
+    // 分成 2x2 格，每格 580x880 px
     const frameW = canvasW/2;
     const frameH = canvasH/2;
-    //const frameW = 600;
-    //const frameH = 900;
 
     // 拍立得樣式白邊
     const marginTop = 30;
@@ -78,20 +75,20 @@
     }
 
     function drawCutLines() {
-      ctx.strokeStyle = "#DDD";
+      ctx.strokeStyle = "#CCC";
       ctx.lineWidth = 1;
       ctx.setLineDash([10, 10]);
 
       // 垂直中心線
       ctx.beginPath();
-      ctx.moveTo(bleed + (canvasW / 2), 0);
-      ctx.lineTo(bleed + (canvasW / 2), canvasH);
+      ctx.moveTo( productW / 2, 0);
+      ctx.lineTo( productW / 2, productH);
       ctx.stroke();
 
       // 水平中心線
       ctx.beginPath();
-      ctx.moveTo(0, bleed + (canvasH / 2));
-      ctx.lineTo(canvasW, bleed + (canvasH / 2));
+      ctx.moveTo(0, canvasH / 2);
+      ctx.lineTo(productW, canvasH / 2);
       ctx.stroke();
 
       ctx.setLineDash([]); // 重設線條樣式
