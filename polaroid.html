@@ -6,6 +6,17 @@
   <style>
     body { text-align: center; font-family: sans-serif; padding: 20px; }
     canvas { border: 1px solid #ccc; margin-top: 20px; max-width: 100%; }
+	    #typewriter {
+      white-space: pre-wrap;
+      border-right: 2px solid #fff;
+      display: inline-block;
+      animation: blink 0.7s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { border-color: #fff; }
+      50% { border-color: transparent; }
+    }
   </style>
 </head>
 <body>
