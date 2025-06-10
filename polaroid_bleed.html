@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>拍立得樣板（4x6 吋 / 含底部留白）</title>
+  <style>
+    body { text-align: center; font-family: sans-serif; padding: 20px; }
+    canvas { border: 1px solid #ccc; margin-top: 20px; max-width: 100%; }
+  </style>
+</head>
+<body>
+
+  <h2>拍立得樣板：4x6 吋（拍立得風格，底部留白）</h2>
+
+  <input type="file" id="imageInput" accept="image/*" multiple>
+  <button id="downloadBtn">下載 PNG</button><br>
+
+  <canvas id="photoCanvas" width="1200" height="1800"></canvas>
+
+  <script>
+    const canvas = document.getElementById('photoCanvas');
+    const ctx = canvas.getContext('2d');
+
+	const bleed = 20;
+	
+	const productW = 1200;
+	const productH = 1800;
+	
+	const canvasW = productW - (bleed * 2); // 1160
+	const canvasH = productH - (bleed * 2); // 1760
+    //const canvasW = 1200;
+    //const canvasH = 1800;
+
+    // 分成 2x2 格，每格 600x900 px
+    const frameW = canvasW/2;
+    const frameH = canvasH/2;
+    //const frameW = 600;
+    //const frameH = 900;
+
+    // 拍立得樣式白邊
+    const marginTop = 30;
+    const marginSide = 30;
+    const marginBottom = 150;
+
+    const photoW = frameW - marginSide * 2;
+    const photoH = frameH - marginTop - marginBottom;
+
+    const positions = [
+      { x: bleed, y: bleed },
+      { x: bleed + (canvasW/2), y: bleed },
+      { x: bleed, y: bleed + (canvasH/2) },
+      { x: bleed + (canvasW/2), y: bleed + (canvasH/2) }
+    ];
+
+    function drawPolaroids(images = []) {
+      // 白底畫布
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvasW, canvasH);
+
+      positions.forEach((pos, i) => {
+        // 畫外框
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(pos.x, pos.y, frameW, frameH);
+        //ctx.strokeStyle = "#ccc";
+		ctx.strokeStyle = "#fff";
+        ctx.strokeRect(pos.x, pos.y, frameW, frameH);
+
+        // 圖片區域位置
+        const imgX = pos.x + marginSide;
+        const imgY = pos.y + marginTop;
+
+        if (images[i]) {
+          drawImageFit(images[i], imgX, imgY, photoW, photoH);
+        }
+      });
+
+      drawCutLines();
+    }
+
+    function drawCutLines() {
+      ctx.strokeStyle = "#DDD";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([10, 10]);
+
+      // 垂直中心線
+      ctx.beginPath();
+      ctx.moveTo(bleed + (canvasW / 2), 0);
+      ctx.lineTo(bleed + (canvasW / 2), canvasH);
+      ctx.stroke();
+
+      // 水平中心線
+      ctx.beginPath();
+      ctx.moveTo(0, bleed + (canvasH / 2));
+      ctx.lineTo(canvasW, bleed + (canvasH / 2));
+      ctx.stroke();
+
+      ctx.setLineDash([]); // 重設線條樣式
+    }
+
+    function drawImageFit(img, x, y, w, h) {
+      const imgRatio = img.width / img.height;
+      const boxRatio = w / h;
+
+      let sx, sy, sWidth, sHeight;
+
+      if (imgRatio > boxRatio) {
+        sHeight = img.height;
+        sWidth = sHeight * boxRatio;
+        sx = (img.width - sWidth) / 2;
+        sy = 0;
+      } else {
+        sWidth = img.width;
+        sHeight = sWidth / boxRatio;
+        sx = 0;
+        sy = (img.height - sHeight) / 2;
+      }
+
+      ctx.drawImage(img, sx, sy, sWidth, sHeight, x, y, w, h);
+    }
+
+    document.getElementById('imageInput').addEventListener('change', (e) => {
+      const files = Array.from(e.target.files).slice(0, 4);
+      const promises = files.map(file => {
+        return new Promise(resolve => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.src = URL.createObjectURL(file);
+        });
+      });
+
+      Promise.all(promises).then(images => {
+        drawPolaroids(images);
+      });
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = 'polaroid_4x6_bottomwhite.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+
+    drawPolaroids();
+  </script>
+
+</body>
+</html>
