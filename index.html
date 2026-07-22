@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>婚禮邀請卡</title>
+    <style>
+      :root {
+        --bg: #fcf6f2;
+        --card: #fffdfa;
+        --accent: #b57a6b;
+        --accent-deep: #6f4c44;
+        --text: #5c4944;
+        --line: #e8d8d0;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+        background: linear-gradient(135deg, #fcf6f2 0%, #f7ece7 100%);
+        color: var(--text);
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        padding: 24px;
+      }
+
+      .card {
+        width: min(100%, 760px);
+        background: var(--card);
+        border-radius: 24px;
+        box-shadow: 0 18px 40px rgba(111, 76, 68, 0.12);
+        overflow: hidden;
+        border: 1px solid var(--line);
+      }
+
+      .hero {
+        padding: 36px 32px 20px;
+        text-align: center;
+      }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        font-size: 0.8rem;
+        letter-spacing: 0.35em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      .hero h1 {
+        margin: 0 0 14px;
+        font-size: 1.9rem;
+        font-weight: 600;
+        color: var(--accent-deep);
+      }
+
+      .hero p {
+        margin: 0;
+        font-size: 0.98rem;
+        line-height: 1.8;
+      }
+
+      .names {
+        margin-top: 16px;
+      }
+
+      .title-line {
+        font-size: 0.95rem;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 8px;
+      }
+
+      .person-name {
+        font-size: 1.55rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        color: var(--accent-deep);
+      }
+
+      .photo-section {
+        padding: 0 32px 18px;
+      }
+
+      .photo-frame {
+        padding: 10px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #fff7f2, #f6e5dd);
+        border: 1px solid var(--line);
+      }
+
+      .photo-frame img {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: 420px;
+        object-fit: contain;
+        border-radius: 14px;
+        background: #fff;
+      }
+
+      .info-section {
+        padding: 8px 32px 32px;
+      }
+
+      .details-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 16px;
+      }
+
+      .detail-item {
+        padding: 14px 16px;
+        border-radius: 14px;
+        background: #fcf2ea;
+        border: 1px solid #efe0d8;
+      }
+
+      .detail-item .label {
+        display: block;
+        font-size: 0.72rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 6px;
+      }
+
+      .message {
+        text-align: center;
+        margin: 8px 0 10px;
+        line-height: 1.8;
+        color: #7b655f;
+      }
+
+      .note {
+        text-align: center;
+        font-size: 0.95rem;
+        color: #8a6f6a;
+      }
+
+      .survey-link {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 10px 16px;
+        border-radius: 999px;
+        background: var(--accent);
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        box-shadow: 0 8px 18px rgba(181, 122, 107, 0.22);
+      }
+
+      .survey-link:hover {
+        opacity: 0.92;
+      }
+
+      @media (max-width: 600px) {
+        .details-grid { grid-template-columns: 1fr; }
+        .hero { padding: 28px 24px 16px; }
+        .photo-section { padding: 0 24px 14px; }
+        .info-section { padding: 8px 24px 24px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <section class="hero">
+        <p class="eyebrow">Wedding Invitation</p>
+        <h1>誠摯邀請您</h1>
+        <p>歡迎您一同見證我們的幸福時刻</p>
+        <div class="names">
+          <div class="title-line">新郎 &amp; 新娘</div>
+          <div class="person-name" id="coupleNames">曾宜唯 &amp; 林欣旻</div>
+        </div>
+      </section>
+
+      <section class="photo-section">
+        <div class="photo-frame">
+          <img src="./1784599895843.jpg" alt="婚禮照片" />
+        </div>
+      </section>
+
+      <section class="info-section">
+        <div class="details-grid">
+          <div class="detail-item">
+            <span class="label">日期</span>
+            <span id="weddingDate">2026/11/08</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">時間</span>
+            <span id="weddingTime">午宴 12:30(時間待確認)</span>
+          </div>
+          <div class="detail-item" style="grid-column: 1 / -1;">
+            <span class="label">地點</span>
+            <span id="weddingVenue">尚未確定</span>
+          </div>
+        </div>
+
+        <p class="message">感謝您一路陪伴我們，期待在這份喜悅中與您相聚。</p>
+        <div style="text-align: center;">
+          <a class="survey-link" href="https://forms.gle/7AU65cBFHEZsPArTA" target="_blank" rel="noopener noreferrer">填寫邀請問卷</a>
+        </div>
+      </section>
+    </main>
+
+  </body>
+</html>
