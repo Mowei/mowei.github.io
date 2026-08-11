@@ -10,7 +10,11 @@
 		.wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:32px}
 		.game{width:100%;max-width:760px;background:var(--card);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.08);padding:28px}
 		h1{margin:0 0 12px;font-size:20px;color:var(--accent)}
-		.dialogue{min-height:180px;padding:16px;border-radius:8px;background:#fffaf8;border:1px solid #fde7e7;box-sizing:border-box;line-height:1.6}
+		.stage{height:200px;border-radius:10px;overflow:hidden;background:linear-gradient(180deg,#eaf7ff 0%,#fff 100%);display:flex;align-items:flex-end;justify-content:center;position:relative;margin-bottom:12px}
+		.stage .bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.98)}
+		.chars{position:relative;z-index:2;display:flex;align-items:flex-end;gap:18px;padding:10px 24px;width:100%;box-sizing:border-box}
+		.char{width:160px;height:200px;object-fit:contain;display:block;filter:drop-shadow(0 8px 18px rgba(0,0,0,0.12))}
+		.dialogue{min-height:120px;padding:12px;border-radius:8px;background:#fffaf8;border:1px solid #fde7e7;box-sizing:border-box;line-height:1.6}
 		.line{margin:8px 0}
 		.speaker{font-weight:700;margin-right:8px;color:var(--accent)}
 		.choices{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px}
@@ -33,6 +37,14 @@
 				<button id="restart" class="btn">重新開始</button>
 				<div class="muted">結局會導向「參加婚禮」或其他選擇</div>
 			</div>
+			<div class="asset-guide" style="margin-top:12px;padding:10px;border-radius:8px;border:1px dashed #f1dede;background:#fffaf9">
+				<strong>資源佔位與命名範例（請上傳到同目錄下的 `assets/`）</strong>
+				<ul style="margin:8px 0 0;padding-left:18px;color:#333">
+					<li><strong>左側角色 (新郎)</strong>: actor=`groom`，建議檔名：`groom_neutral.png`, `groom_smile.png`, `groom_happy.png`, `groom_sad.png`</li>
+					<li><strong>右側角色 (新娘)</strong>: actor=`bride`，建議檔名：`bride_smile.png`, `bride_happy.png`, `bride_concern.png`, `bride_reassure.png`, `bride_sad.png`, `bride_hopeful.png`</li>
+					<li>若檔案存在，系統會自動以 `./assets/{actor}_{pose}.png` 嘗試載入，找不到則顯示佔位圖。</li>
+				</ul>
+			</div>
 		</div>
 	</div>
 
@@ -40,6 +52,9 @@
 		const dialogueEl = document.getElementById('dialogue');
 		const choicesEl = document.getElementById('choices');
 		const restartBtn = document.getElementById('restart');
+		const leftChar = document.getElementById('leftChar');
+		const rightChar = document.getElementById('rightChar');
+		const stageBg = document.getElementById('stageBg');
 
 		const state = { attending: false };
 
@@ -50,14 +65,17 @@
 					{text:'當然，很開心！',next:'greet_positive'},
 					{text:'我還要確認時間',next:'uncertain'},
 					{text:'抱歉，看起來我可能無法出席',next:'decline'}
-				]
+				],
+				sprites:[{slot:'left',actor:'groom',pose:'smile'},{slot:'right',actor:'bride',pose:'smile'}]
 			},
 			greet_positive:{
 				lines:[{"who":"你","text":"太好了！我很想來。請問婚禮有哪些安排呢？"},{"who":"新娘","text":"我們會在午後舉辦儀式，晚宴之後還有舞會。若你能來，我們超級開心！"}],
+				sprites:[{slot:'right',actor:'bride',pose:'happy'},{slot:'left',actor:'groom',pose:'happy'}],
 				choices:[{text:'我決定參加！',next:'attend_end'},{text:'我先確認時間',next:'uncertain'}]
 			},
 			uncertain:{
 				lines:[{"who":"新郎","text":"完全理解！請問你最擔心的是交通、時間，還是其他事情呢？"}],
+				sprites:[{slot:'left',actor:'groom',pose:'neutral'},{slot:'right',actor:'bride',pose:'concern'}],
 				choices:[
 					{text:'交通/時間問題',next:'reassure_transport'},
 					{text:'禮物或服裝問題',next:'reassure_gift'},
@@ -66,18 +84,22 @@
 			},
 			reassure_transport:{
 				lines:[{"who":"新娘","text":"沒關係，我們會提供停車資訊，也可以幫忙安排接駁。若需要，我們也會錄製直播片段。"}],
+				sprites:[{slot:'right',actor:'bride',pose:'reassure'},{slot:'left',actor:'groom',pose:'smile'}],
 				choices:[{text:'那我可以參加！',next:'attend_end'},{text:'還是有點難',next:'uncertain2'}]
 			},
 			reassure_gift:{
 				lines:[{"who":"新郎","text":"別擔心，能來就是最好的禮物。禮物可以之後補也可以線上祝福。"}],
+				sprites:[{slot:'left',actor:'groom',pose:'smile'},{slot:'right',actor:'bride',pose:'smile'}],
 				choices:[{text:'好，那我來參加！',next:'attend_end'},{text:'我需要再想想',next:'uncertain'}]
 			},
 			uncertain2:{
 				lines:[{"who":"你","text":"可能真的要看當天狀況..."},{"who":"新娘","text":"我們會很希望見到你，如果最後無法也沒關係，但如果可以的話請一定來我們婚禮吧！"}],
+				sprites:[{slot:'right',actor:'bride',pose:'hopeful'},{slot:'left',actor:'groom',pose:'neutral'}],
 				choices:[{text:'我決定參加婚禮',next:'attend_end'},{text:'抱歉，我仍然不能',next:'end_decline'}]
 			},
 			decline:{
 				lines:[{"who":"你","text":"真的抱歉，這次我可能無法出席。"},{"who":"新娘","text":"我們會很想念你，謝謝你回覆。若有改變請告訴我們～"}],
+				sprites:[{slot:'right',actor:'bride',pose:'sad'},{slot:'left',actor:'groom',pose:'sad'}],
 				choices:[{text:'我可以再想想',next:'uncertain'},{text:'確定不能',next:'end_decline'}]
 			},
 			decline_followup:{
@@ -122,9 +144,45 @@
 			nextLine();
 		}
 
+		// simple placeholder generator: returns data URL SVGs for actor+pose
+		function getPlaceholderDataUrl(actor,pose){
+			const colors = {bride:'#f7c6d0',groom:'#c6d7f7',guest:'#e6e6e6'};
+			const face = {
+				smile:':)', happy:':D', neutral:':|', sad:':(', concern:':/', reassure:':)', hopeful:':)'
+			};
+			const bg = colors[actor] || '#ddd';
+			const emoji = face[pose] || ':)';
+			const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='320' height='400'><rect width='100%' height='100%' fill='${bg}'/><g font-family='Noto Sans TC,Arial' font-size='36' text-anchor='middle'><text x='50%' y='40%' fill='#fff' font-weight='700'>${actor}</text><text x='50%' y='60%' fill='#fff' font-size='80'>${emoji}</text><text x='50%' y='90%' fill='#fff' font-size='16'>${pose}</text></g></svg>`;
+			return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+		}
+
+		function tryAssetThenFallback(slot,actor,pose){
+			const rel = `./assets/${actor}_${pose}.png`;
+			const imgTest = new Image();
+			imgTest.onload = ()=>{
+				if(slot === 'left') leftChar.src = rel;
+				if(slot === 'right') rightChar.src = rel;
+			};
+			imgTest.onerror = ()=>{
+				const url = getPlaceholderDataUrl(actor,pose);
+				if(slot === 'left') leftChar.src = url;
+				if(slot === 'right') rightChar.src = url;
+			};
+			imgTest.src = rel;
+		}
+
+		function setSprite(slot,actor,pose){
+			// try to load real asset first (assets/{actor}_{pose}.png), otherwise use placeholder
+			tryAssetThenFallback(slot,actor,pose);
+		}
+
 		function renderScene(id){
 			const scene = scenes[id];
 			if(!scene) return;
+			// set sprites if provided
+			if(scene.sprites){
+				scene.sprites.forEach(s=> setSprite(s.slot,s.actor,s.pose));
+			}
 			typeLines(scene.lines, ()=>{
 				// render choices
 				choicesEl.innerHTML='';
@@ -143,6 +201,10 @@
 		}
 
 		restartBtn.addEventListener('click', ()=>{ state.attending=false; renderScene('start'); });
+
+		// initial placeholder sprites
+		setSprite('left','groom','neutral');
+		setSprite('right','bride','smile');
 
 		// start
 		renderScene('start');
