@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>婚禮文字冒險</title>
+	<style>
+		:root{--bg:#fff7f0;--card:#fff;--accent:#d46b6b;--muted:#666}
+		html,body{height:100%;margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Noto Sans TC',sans-serif;background:linear-gradient(180deg,#fff 0%,#fff7f0 100%);color:#222}
+		.wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:32px}
+		.game{width:100%;max-width:760px;background:var(--card);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.08);padding:28px}
+		h1{margin:0 0 12px;font-size:20px;color:var(--accent)}
+		.dialogue{min-height:180px;padding:16px;border-radius:8px;background:#fffaf8;border:1px solid #fde7e7;box-sizing:border-box;line-height:1.6}
+		.line{margin:8px 0}
+		.speaker{font-weight:700;margin-right:8px;color:var(--accent)}
+		.choices{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px}
+		.btn{background:#fff;border:1px solid #eee;padding:10px 14px;border-radius:8px;cursor:pointer;transition:all .15s;box-shadow:0 2px 6px rgba(0,0,0,0.04)}
+		.btn:hover{transform:translateY(-3px);box-shadow:0 8px 18px rgba(0,0,0,0.06)}
+		.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+		.controls{margin-top:16px;display:flex;gap:8px;align-items:center}
+		.muted{color:var(--muted);font-size:13px}
+		.final{padding:12px;border-radius:10px;background:linear-gradient(90deg,#fff8f8,#fff);border:1px solid #ffdcdc;margin-top:12px}
+		@media (max-width:480px){.game{padding:18px}.dialogue{min-height:160px}}
+	</style>
+</head>
+<body>
+	<div class="wrap">
+		<div class="game" role="main">
+			<h1>婚禮文字冒險 — 成為賓客</h1>
+			<div id="dialogue" class="dialogue" aria-live="polite"></div>
+			<div id="choices" class="choices"></div>
+			<div class="controls">
+				<button id="restart" class="btn">重新開始</button>
+				<div class="muted">結局會導向「參加婚禮」或其他選擇</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const dialogueEl = document.getElementById('dialogue');
+		const choicesEl = document.getElementById('choices');
+		const restartBtn = document.getElementById('restart');
+
+		const state = { attending: false };
+
+		const scenes = {
+			start: {
+				lines:[{"who":"新郎 & 新娘","text":"嗨！我們是小明和小美，謝謝你打開這份邀請。我們希望你能來參加我們的婚禮。想先聊聊嗎？"}],
+				choices:[
+					{text:'當然，很開心！',next:'greet_positive'},
+					{text:'我還要確認時間',next:'uncertain'},
+					{text:'抱歉，看起來我可能無法出席',next:'decline'}
+				]
+			},
+			greet_positive:{
+				lines:[{"who":"你","text":"太好了！我很想來。請問婚禮有哪些安排呢？"},{"who":"新娘","text":"我們會在午後舉辦儀式，晚宴之後還有舞會。若你能來，我們超級開心！"}],
+				choices:[{text:'我決定參加！',next:'attend_end'},{text:'我先確認時間',next:'uncertain'}]
+			},
+			uncertain:{
+				lines:[{"who":"新郎","text":"完全理解！請問你最擔心的是交通、時間，還是其他事情呢？"}],
+				choices:[
+					{text:'交通/時間問題',next:'reassure_transport'},
+					{text:'禮物或服裝問題',next:'reassure_gift'},
+					{text:'我可能真的沒辦法',next:'decline_followup'}
+				]
+			},
+			reassure_transport:{
+				lines:[{"who":"新娘","text":"沒關係，我們會提供停車資訊，也可以幫忙安排接駁。若需要，我們也會錄製直播片段。"}],
+				choices:[{text:'那我可以參加！',next:'attend_end'},{text:'還是有點難',next:'uncertain2'}]
+			},
+			reassure_gift:{
+				lines:[{"who":"新郎","text":"別擔心，能來就是最好的禮物。禮物可以之後補也可以線上祝福。"}],
+				choices:[{text:'好，那我來參加！',next:'attend_end'},{text:'我需要再想想',next:'uncertain'}]
+			},
+			uncertain2:{
+				lines:[{"who":"你","text":"可能真的要看當天狀況..."},{"who":"新娘","text":"我們會很希望見到你，如果最後無法也沒關係，但如果可以的話請一定來我們婚禮吧！"}],
+				choices:[{text:'我決定參加婚禮',next:'attend_end'},{text:'抱歉，我仍然不能',next:'end_decline'}]
+			},
+			decline:{
+				lines:[{"who":"你","text":"真的抱歉，這次我可能無法出席。"},{"who":"新娘","text":"我們會很想念你，謝謝你回覆。若有改變請告訴我們～"}],
+				choices:[{text:'我可以再想想',next:'uncertain'},{text:'確定不能',next:'end_decline'}]
+			},
+			decline_followup:{
+				lines:[{"who":"你","text":"看來真的有衝突，可能無法參加。"},{"who":"新郎","text":"真的很可惜。不過如果情況改變，歡迎隨時告訴我們！"}],
+				choices:[{text:'等我再看看，或許可以',next:'uncertain'},{text:'我確定不能',next:'end_decline'}]
+			},
+			end_decline:{
+				lines:[{"who":"系統","text":"你選擇了無法出席。新人感謝你的祝福，遊戲結束。"}],
+				choices:[{text:'重新開始',next:'start'}]
+			},
+			attend_end:{
+				lines:[{"who":"系統","text":"太棒了！你決定參加婚禮，兩位新人非常開心！"}],
+				choices:[{text:'確認參加（送出 RSVP）',next:'rsvp_confirm'},{text:'重新開始',next:'start'}]
+			},
+			rsvp_confirm:{
+				lines:[{"who":"系統","text":"已收到你的 RSVP：參加。期待在婚禮現場見到你！"}],
+				choices:[{text:'再次遊玩',next:'start'}]
+			}
+		};
+
+		function clearElems(){ dialogueEl.innerHTML=''; choicesEl.innerHTML=''; }
+
+		function typeLines(lines, cb){
+			clearElems();
+			let i=0;
+			function nextLine(){
+				if(i>=lines.length){ cb && cb(); return; }
+				const {who,text} = lines[i++];
+				const p = document.createElement('div'); p.className='line';
+				const spanWho = document.createElement('span'); spanWho.className='speaker'; spanWho.textContent = who + ':';
+				p.appendChild(spanWho);
+				const spanText = document.createElement('span'); spanText.className='content'; p.appendChild(spanText);
+				dialogueEl.appendChild(p);
+				// typewriter
+				let idx=0;
+				const full = text;
+				const t = setInterval(()=>{
+					spanText.textContent = full.slice(0,++idx);
+					if(idx>=full.length){ clearInterval(t); setTimeout(nextLine,300); }
+				},18);
+			}
+			nextLine();
+		}
+
+		function renderScene(id){
+			const scene = scenes[id];
+			if(!scene) return;
+			typeLines(scene.lines, ()=>{
+				// render choices
+				choicesEl.innerHTML='';
+				scene.choices.forEach(c=>{
+					const b = document.createElement('button'); b.className='btn'; b.textContent = c.text;
+					if(c.text.includes('參加') || c.text.includes('確認')) b.classList.add('primary');
+					b.addEventListener('click', ()=>{
+						// update state when reaching RSVP
+						if(c.next === 'attend_end') state.attending = true;
+						if(c.next === 'rsvp_confirm') state.attending = true;
+						renderScene(c.next);
+					});
+					choicesEl.appendChild(b);
+				});
+			});
+		}
+
+		restartBtn.addEventListener('click', ()=>{ state.attending=false; renderScene('start'); });
+
+		// start
+		renderScene('start');
+	</script>
+</body>
+</html>
+
