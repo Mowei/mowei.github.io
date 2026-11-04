@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f2ed">
+  <title>欣旻 &amp; 宜唯｜座位查詢</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f8f2ed;
+      --card: #fffdfa;
+      --ink: #3e3936;
+      --muted: #817772;
+      --rose: #bd625b;
+      --rose-deep: #973f3a;
+      --rose-pale: #f4e1dc;
+      --sage: #687f6e;
+      --line: #e7d9d0;
+      --gold: #c59c5a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background-color: var(--paper);
+      background-image: radial-gradient(#ddcfc4 0.65px, transparent 0.65px);
+      background-size: 15px 15px;
+      font-family: "Noto Serif TC", "PingFang TC", serif;
+    }
+
+    button, input { font: inherit; }
+
+    .page {
+      width: min(1240px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 34px 0 56px;
+    }
+
+    .masthead {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 0 4px 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .eyebrow {
+      margin: 0 0 7px;
+      color: var(--rose);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(26px, 4vw, 36px);
+      font-weight: 600;
+    }
+
+    .event-meta {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .masthead-note {
+      padding-bottom: 4px;
+      color: var(--sage);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(270px, 340px) minmax(0, 1fr);
+      align-items: start;
+      gap: 24px;
+      padding-top: 24px;
+    }
+
+    .search-panel, .map-panel {
+      border: 1px solid var(--line);
+      background: var(--card);
+      box-shadow: 0 12px 34px #5b453319;
+    }
+
+    .search-panel {
+      position: sticky;
+      top: 20px;
+      padding: 24px 22px;
+    }
+
+    .section-label {
+      margin: 0 0 8px;
+      color: var(--rose);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+    }
+
+    h2 {
+      margin: 0 0 18px;
+      font-size: 21px;
+      font-weight: 600;
+    }
+
+    .search-form { display: flex; gap: 8px; }
+
+    .search-form input {
+      width: 100%;
+      min-width: 0;
+      height: 46px;
+      padding: 0 13px;
+      border: 1px solid #d9c9bf;
+      border-radius: 3px;
+      outline: none;
+      background: #fff;
+      color: var(--ink);
+      font-size: 15px;
+    }
+
+    .search-form input:focus { border-color: var(--rose); box-shadow: 0 0 0 3px #bd625b20; }
+
+    .search-form button {
+      flex: 0 0 auto;
+      height: 46px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 3px;
+      background: var(--rose);
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .search-form button:hover { background: var(--rose-deep); }
+
+    .search-hint {
+      min-height: 20px;
+      margin: 9px 0 15px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .matches { display: grid; gap: 7px; }
+
+    .match-button {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      background: white;
+      color: var(--ink);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .match-button:hover, .match-button[aria-current="true"] { border-color: var(--rose); background: #fbf2ef; }
+
+    .match-table { color: var(--rose-deep); font-size: 12px; white-space: nowrap; }
+
+    .empty-state {
+      padding: 14px 12px;
+      border: 1px dashed var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .result {
+      display: none;
+      margin-top: 18px;
+      padding: 16px;
+      border-left: 3px solid var(--gold);
+      background: #f8f2e8;
+    }
+
+    .result.is-visible { display: block; }
+
+    .result-name { margin: 0 0 4px; font-size: 20px; font-weight: 600; }
+    .result-table { margin: 0; color: var(--rose-deep); font-size: 15px; }
+    .result-note { margin: 9px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 22px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .legend-line { width: 28px; border-top: 2px dashed var(--rose); }
+
+    .map-panel { padding: 14px; }
+
+    .map-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 2px 4px 12px;
+    }
+
+    .map-heading h2 { margin: 0; font-size: 16px; }
+    .map-heading span { color: var(--muted); font-size: 12px; }
+
+    .map-frame {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      background: #f7f3ef;
+      line-height: 0;
+    }
+
+    .map-frame img { display: block; width: 100%; height: auto; }
+
+    .map-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .route {
+      display: none;
+      fill: none;
+      stroke: var(--rose-deep);
+      stroke-width: 7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 14 12;
+      filter: drop-shadow(0 1px 2px #fff);
+      animation: route-in 500ms ease-out both, march 1.2s linear infinite;
+    }
+
+    .route.is-visible { display: block; }
+
+    .map-marker { cursor: pointer; }
+    .map-marker circle { fill: #fffdfa; stroke: #8e8178; stroke-width: 4; }
+    .map-marker.assigned circle { stroke: var(--sage); }
+    .map-marker text {
+      fill: var(--ink);
+      font-family: "Noto Serif TC", serif;
+      font-size: 21px;
+      font-weight: 700;
+      text-anchor: middle;
+      dominant-baseline: central;
+      pointer-events: none;
+    }
+    .map-marker.active circle { fill: var(--rose); stroke: white; stroke-width: 5; }
+    .map-marker.active text { fill: white; }
+    .map-marker:focus { outline: none; }
+    .map-marker:focus circle { stroke: var(--rose-deep); stroke-width: 8; }
+
+    .entrance-dot { fill: var(--sage); stroke: white; stroke-width: 5; }
+    .route-pulse { fill: var(--rose); stroke: white; stroke-width: 5; }
+
+    .map-caption {
+      margin: 11px 4px 1px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    @keyframes march { to { stroke-dashoffset: -26; } }
+    @keyframes route-in { from { opacity: 0; } to { opacity: 1; } }
+
+    @media (max-width: 760px) {
+      .page { width: min(100% - 24px, 560px); padding-top: 22px; }
+      .masthead { align-items: start; }
+      .masthead-note { display: none; }
+      .workspace { grid-template-columns: 1fr; gap: 14px; padding-top: 16px; }
+      .search-panel { position: static; padding: 20px 17px; }
+      .map-panel { padding: 9px; }
+      .map-marker circle { stroke-width: 5; }
+      .map-marker text { font-size: 24px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">HSINMIN &amp; YIWEI · 11/08</p>
+        <h1>尋找座位</h1>
+        <p class="event-meta">第一廳｜維多利亞廳</p>
+      </div>
+      <div class="masthead-note">願今天的相聚，成為往後的甜蜜回憶</div>
+    </header>
+
+    <section class="workspace" aria-label="座位查詢與位置圖">
+      <aside class="search-panel">
+        <p class="section-label">GUEST SEATING</p>
+        <h2>輸入姓名查桌次</h2>
+        <form class="search-form" id="search-form" role="search">
+          <input id="guest-search" type="search" placeholder="請輸入姓名" autocomplete="off" aria-label="搜尋姓名">
+          <button type="submit">搜尋</button>
+        </form>
+        <p class="search-hint" id="search-hint" aria-live="polite">共 49 位賓客，輸入姓名即可查詢</p>
+        <div class="matches" id="matches" aria-live="polite"></div>
+        <section class="result" id="result" aria-live="polite">
+          <p class="result-name" id="result-name"></p>
+          <p class="result-table" id="result-table"></p>
+          <p class="result-note">已在位置圖標示桌位與建議路線，請從圖中央下方的入口通道前往。</p>
+        </section>
+        <div class="legend"><span class="legend-line" aria-hidden="true"></span>由入口通道前往座位的建議路線</div>
+      </aside>
+
+      <section class="map-panel" aria-labelledby="map-title">
+        <div class="map-heading">
+          <h2 id="map-title">宴會廳位置圖</h2>
+          <span>點選桌號也可查看名單</span>
+        </div>
+        <div class="map-frame" id="map-frame">
+          <img src="位置圖.png" alt="宴會廳桌次平面圖，中央下方為入口通道">
+          <svg class="map-overlay" viewBox="0 0 1000 1415" preserveAspectRatio="none" aria-label="桌次與引導路線">
+            <path class="route" id="route" d=""></path>
+            <circle class="entrance-dot" cx="610" cy="1325" r="13" aria-hidden="true"></circle>
+            <g id="markers"></g>
+            <circle class="route-pulse" id="route-pulse" cx="0" cy="0" r="12" visibility="hidden" aria-hidden="true"></circle>
+          </svg>
+        </div>
+        <p class="map-caption">綠框桌次有提供姓名查詢。桌位位置依婚宴場地圖標示，路線為場內方向參考。</p>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const seating = {
+      4: ["李璟宜", "蘇政成", "王雅萍", "黃雅筠", "劉玉婷"],
+      7: ["許椏筑", "林易葳", "蔡佳妤"],
+      10: ["程筱涵", "鄭叔聞", "詹詒文", "栁芝瑜", "李怡蓓", "陳怡靜"],
+      13: ["許千繚", "蕭志誠", "莊青霖", "陳靖宜", "周雨何", "吳姵穎", "朱焉", "蔡禕禕", "陳億蕊"],
+      16: ["林靖妤", "楊淑萍", "胡亦欣", "小花", "黃⽟婷", "胡雅琴", "趙家賢"],
+      18: ["謝詔安", "林忠翰", "蔡宗儒", "張愷紘", "江治緯", "余冠儒", "江家志"],
+      15: ["林宏道", "徐欣榆", "何恭穎", "賴威慎", "吳爵宏", "林信瀚", "黃彥碩"],
+      17: ["李易霖", "李冠廷", "陳冠宇", "陳星孝", "侯佳佑"]
+    };
+
+    const tablePositions = {
+      1: [610, 285], 2: [191, 370], 3: [408, 370], 4: [805, 370],
+      5: [191, 569], 6: [408, 569], 7: [805, 569],
+      8: [191, 751], 9: [408, 751], 10: [805, 751],
+      11: [191, 950], 12: [408, 950], 13: [805, 950],
+      14: [191, 1133], 15: [408, 1133], 16: [805, 1133],
+      17: [408, 1325], 18: [805, 1325]
+    };
+    const routeStart = [610, 1325];
+
+    const guests = Object.entries(seating).flatMap(([table, names]) =>
+      names.map(name => ({ name, table: Number(table) }))
+    );
+    const searchInput = document.querySelector("#guest-search");
+    const searchHint = document.querySelector("#search-hint");
+    const matchesElement = document.querySelector("#matches");
+    const resultElement = document.querySelector("#result");
+    const routeElement = document.querySelector("#route");
+    const markerGroup = document.querySelector("#markers");
+    const pulse = document.querySelector("#route-pulse");
+    let activeGuest = null;
+
+    function routeFor(table) {
+      const [x, y] = tablePositions[table];
+      const [startX, startY] = routeStart;
+      if (table === 15 || table === 16) {
+        return `M ${startX} ${startY} L ${startX} 1080 L ${x} 1080 L ${x} ${y}`;
+      }
+      if (table === 17) {
+        return `M ${startX} ${startY} L ${x} ${y}`;
+      }
+      if (table === 18) {
+        return `M ${startX} ${startY} L ${x} ${y}`;
+      }
+      return `M ${startX} ${startY} L ${startX} ${y} L ${x} ${y}`;
+    }
+
+    function renderMarkers() {
+      for (const [table, [x, y]] of Object.entries(tablePositions)) {
+        const marker = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        marker.classList.add("map-marker");
+        if (seating[table]) marker.classList.add("assigned");
+        marker.dataset.table = table;
+        marker.setAttribute("role", "button");
+        marker.setAttribute("tabindex", "0");
+        marker.setAttribute("aria-label", seating[table] ? `${table} 桌，查看賓客名單` : `${table} 桌，無提供名單`);
+        marker.innerHTML = `<circle cx="${x}" cy="${y}" r="24"></circle><text x="${x}" y="${y}">${table}</text>`;
+        marker.addEventListener("click", () => showTable(Number(table)));
+        marker.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            showTable(Number(table));
+          }
+        });
+        markerGroup.append(marker);
+      }
+    }
+
+    function setActiveTable(table) {
+      document.querySelectorAll(".map-marker").forEach(marker => {
+        marker.classList.toggle("active", Number(marker.dataset.table) === table);
+      });
+      routeElement.setAttribute("d", routeFor(table));
+      routeElement.classList.add("is-visible");
+      const [x, y] = tablePositions[table];
+      pulse.setAttribute("cx", x);
+      pulse.setAttribute("cy", y);
+      pulse.setAttribute("visibility", "visible");
+    }
+
+    function showGuest(guest) {
+      activeGuest = guest;
+      document.querySelector("#result-name").textContent = guest.name;
+      document.querySelector("#result-table").textContent = `${guest.table} 桌`;
+      resultElement.classList.add("is-visible");
+      setActiveTable(guest.table);
+      document.querySelectorAll(".match-button").forEach(button => {
+        button.setAttribute("aria-current", String(button.dataset.name === guest.name));
+      });
+    }
+
+    function showTable(table) {
+      const names = seating[table];
+      if (!names) {
+        searchHint.textContent = `${table} 桌目前沒有提供姓名名單`;
+        activeGuest = null;
+        resultElement.classList.remove("is-visible");
+        setActiveTable(table);
+        return;
+      }
+      matchesElement.replaceChildren();
+      searchHint.textContent = `${table} 桌共 ${names.length} 位賓客`;
+      names.forEach(name => {
+        const guest = { name, table };
+        const button = document.createElement("button");
+        button.className = "match-button";
+        button.type = "button";
+        button.dataset.name = name;
+        button.innerHTML = `<span>${name}</span><span class="match-table">${table} 桌</span>`;
+        button.addEventListener("click", () => showGuest(guest));
+        matchesElement.append(button);
+      });
+      const firstGuest = names.find(name => activeGuest?.name === name);
+      if (firstGuest) showGuest({ name: firstGuest, table });
+      else {
+        activeGuest = null;
+        resultElement.classList.remove("is-visible");
+        setActiveTable(table);
+      }
+    }
+
+    function searchGuests(query) {
+      const normalized = query.trim();
+      activeGuest = null;
+      resultElement.classList.remove("is-visible");
+      routeElement.classList.remove("is-visible");
+      pulse.setAttribute("visibility", "hidden");
+      document.querySelectorAll(".map-marker").forEach(marker => marker.classList.remove("active"));
+      matchesElement.replaceChildren();
+      if (!normalized) {
+        searchHint.textContent = `共 ${guests.length} 位賓客，輸入姓名即可查詢`;
+        return;
+      }
+      const found = guests.filter(guest => guest.name.includes(normalized));
+      if (!found.length) {
+        searchHint.textContent = "找不到這個姓名，請確認輸入內容";
+        return;
+      }
+      searchHint.textContent = found.length === 1 ? "找到 1 位賓客" : `找到 ${found.length} 位賓客，請選擇`;
+      found.forEach(guest => {
+        const button = document.createElement("button");
+        button.className = "match-button";
+        button.type = "button";
+        button.dataset.name = guest.name;
+        button.innerHTML = `<span>${guest.name}</span><span class="match-table">${guest.table} 桌</span>`;
+        button.addEventListener("click", () => showGuest(guest));
+        matchesElement.append(button);
+      });
+      if (found.length === 1) showGuest(found[0]);
+    }
+
+    document.querySelector("#search-form").addEventListener("submit", event => {
+      event.preventDefault();
+      searchGuests(searchInput.value);
+    });
+
+    searchInput.addEventListener("input", () => searchGuests(searchInput.value));
+    renderMarkers();
+  </script>
+</body>
+</html>
