@@ -112,8 +112,6 @@
       font-weight: 600;
     }
 
-    .search-form { display: flex; gap: 8px; }
-
     .search-form input {
       width: 100%;
       min-width: 0;
@@ -129,20 +127,6 @@
 
     .search-form input:focus { border-color: var(--rose); box-shadow: 0 0 0 3px #bd625b20; }
 
-    .search-form button {
-      flex: 0 0 auto;
-      height: 46px;
-      padding: 0 16px;
-      border: 0;
-      border-radius: 3px;
-      background: var(--rose);
-      color: white;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .search-form button:hover { background: var(--rose-deep); }
-
     .search-hint {
       min-height: 20px;
       margin: 9px 0 15px;
@@ -156,6 +140,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 8px;
       width: 100%;
       padding: 10px 12px;
       border: 1px solid var(--line);
@@ -168,7 +153,9 @@
 
     .match-button:hover, .match-button[aria-current="true"] { border-color: var(--rose); background: #fbf2ef; }
 
+    .match-details { display: grid; justify-items: end; gap: 2px; }
     .match-table { color: var(--rose-deep); font-size: 12px; white-space: nowrap; }
+    .match-count { color: var(--muted); font-size: 11px; white-space: nowrap; }
 
     .empty-state {
       padding: 14px 12px;
@@ -190,6 +177,7 @@
 
     .result-name { margin: 0 0 4px; font-size: 20px; font-weight: 600; }
     .result-table { margin: 0; color: var(--rose-deep); font-size: 15px; }
+    .result-attendance { margin: 6px 0 0; color: var(--ink); font-size: 13px; }
     .result-note { margin: 9px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
 
     .legend {
@@ -314,13 +302,13 @@
         <h2>輸入姓名查桌次</h2>
         <form class="search-form" id="search-form" role="search">
           <input id="guest-search" type="search" placeholder="請輸入姓名" autocomplete="off" aria-label="搜尋姓名">
-          <button type="submit">搜尋</button>
         </form>
         <p class="search-hint" id="search-hint" aria-live="polite">輸入姓名即可查詢</p>
         <div class="matches" id="matches" aria-live="polite"></div>
         <section class="result" id="result" aria-live="polite">
           <p class="result-name" id="result-name"></p>
           <p class="result-table" id="result-table"></p>
+          <p class="result-attendance" id="result-attendance"></p>
           <p class="result-note">已在桌位圖標示桌位與建議路線，請從圖中央下方的入口通道前往。</p>
         </section>
         <div class="legend"><span class="legend-line" aria-hidden="true"></span>由入口通道前往座位的建議路線</div>
@@ -351,10 +339,66 @@
       7: ["許椏筑", "林易葳", "蔡佳妤"],
       10: ["程筱涵", "鄭叔聞", "詹詒文", "栁芝瑜", "李怡蓓", "陳怡靜"],
       13: ["許千繚", "蕭志誠", "莊青霖", "陳靖宜", "周雨何", "吳姵穎", "朱焉", "蔡禕禕", "陳億蕊"],
-      16: ["林靖妤", "楊淑萍", "胡亦欣", "小花", "黃⽟婷", "胡雅琴", "趙家賢"],
+      16: ["林靖妤", "楊淑萍", "胡亦欣", "黃⽟婷", "胡雅琴", "趙家賢"],
       18: ["謝詔安", "林忠翰", "蔡宗儒", "張愷紘", "江治緯", "余冠儒", "江家志"],
       15: ["林宏道", "徐欣榆", "何恭穎", "賴威慎", "吳爵宏", "林信瀚", "黃彥碩"],
       17: ["李易霖", "李冠廷", "陳冠宇", "陳星孝", "侯佳佑"]
+    };
+    const attendanceByName = {
+      "李璟宜": { adults: 3, children: 0 },
+      "蘇政成": { adults: 1, children: 0 },
+      "王雅萍": { adults: 2, children: 0 },
+      "黃雅筠": { adults: 2, children: 0 },
+      "劉玉婷": { adults: 2, children: 0 },
+
+      "許椏筑": { adults: 2, children: 0 },
+      "林易葳": { adults: 2, children: 2 },
+      "蔡佳妤": { adults: 2, children: 0 },
+
+      "程筱涵": { adults: 2, children: 0 },
+      "鄭叔聞": { adults: 2, children: 0 },
+      "詹詒文": { adults: 1, children: 0 },
+      "栁芝瑜": { adults: 1, children: 0 },
+      "李怡蓓": { adults: 2, children: 0 },
+      "陳怡靜": { adults: 1, children: 0 },
+
+      "許千繚": { adults: 1, children: 0 },
+      "蕭志誠": { adults: 1, children: 0 },
+      "莊青霖": { adults: 1, children: 0 },
+      "陳靖宜": { adults: 1, children: 0 },
+      "周雨何": { adults: 1, children: 0 },
+      "吳姵穎": { adults: 1, children: 0 },
+      "朱焉": { adults: 1, children: 0 },
+      "蔡禕禕": { adults: 1, children: 0 },
+      "陳億蕊": { adults: 1, children: 0 },
+
+      "林靖妤": { adults: 2, children: 0 },
+      "楊淑萍": { adults: 2, children: 0 },
+      "胡亦欣": { adults: 1, children: 1 },
+      "黃⽟婷": { adults: 2, children: 0 },
+      "胡雅琴": { adults: 1, children: 0 },
+      "趙家賢": { adults: 1, children: 0 },
+
+      "謝詔安": { adults: 2, children: 0 },
+      "林忠翰": { adults: 1, children: 0 },
+      "蔡宗儒": { adults: 1, children: 0 },
+      "張愷紘": { adults: 1, children: 0 },
+      "江治緯": { adults: 1, children: 0 },
+      "余冠儒": { adults: 2, children: 0 },
+      "江家志": { adults: 1, children: 0 },
+
+      "林宏道": { adults: 2, children: 0 },
+      "徐欣榆": { adults: 1, children: 0 },
+      "何恭穎": { adults: 1, children: 0 },
+      "賴威慎": { adults: 1, children: 0 },
+      "吳爵宏": { adults: 1, children: 0 },
+      "林信瀚": { adults: 1, children: 0 },
+      "黃彥碩": { adults: 1, children: 0 },
+
+      "李易霖": { adults: 1, children: 0 },
+      "陳冠宇": { adults: 1, children: 0 },
+      "陳星孝": { adults: 2, children: 0 },
+      "侯佳佑": { adults: 2, children: 1 }
     };
 
     const tablePositions = {
@@ -374,10 +418,30 @@
     const searchHint = document.querySelector("#search-hint");
     const matchesElement = document.querySelector("#matches");
     const resultElement = document.querySelector("#result");
+    const resultAttendanceElement = document.querySelector("#result-attendance");
     const routeElement = document.querySelector("#route");
     const markerGroup = document.querySelector("#markers");
     const pulse = document.querySelector("#route-pulse");
     let activeGuest = null;
+
+    function summarizeAttendance(names) {
+      return names.reduce((summary, name) => {
+        const attendance = attendanceByName[name];
+        if (!attendance) {
+          summary.pending += 1;
+          return summary;
+        }
+        summary.adults += attendance.adults;
+        summary.children += attendance.children;
+        return summary;
+      }, { adults: 0, children: 0, pending: 0 });
+    }
+
+    function attendanceLabel(name) {
+      const attendance = attendanceByName[name];
+      if (!attendance) return "人數待確認";
+      return `共 ${attendance.adults + attendance.children} 人`;
+    }
 
     function routeFor(table) {
       const [x, y] = tablePositions[table];
@@ -427,18 +491,27 @@
       pulse.setAttribute("visibility", "visible");
     }
 
-    function showGuest(guest) {
+    function showGuest(guest, shouldScroll = false) {
       activeGuest = guest;
+
       document.querySelector("#result-name").textContent = guest.name;
       document.querySelector("#result-table").textContent = `${guest.table} 桌`;
+      const attendance = attendanceByName[guest.name];
+      resultAttendanceElement.textContent = attendance
+        ? `出席人數：成人 ${attendance.adults} 位、兒童 ${attendance.children} 位，共 ${attendance.adults + attendance.children} 位`
+        : "出席人數：待確認";
       resultElement.classList.add("is-visible");
       setActiveTable(guest.table);
+      if (shouldScroll) {
+        const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+        resultElement.scrollIntoView({ behavior, block: "start" });
+      }
       document.querySelectorAll(".match-button").forEach(button => {
         button.setAttribute("aria-current", String(button.dataset.name === guest.name));
       });
     }
 
-    function showTable(table) {
+    function showTable(table, shouldScroll = false) {
       const names = seating[table];
       if (!names) {
         searchHint.textContent = `${table} 桌目前沒有提供姓名名單`;
@@ -448,19 +521,24 @@
         return;
       }
       matchesElement.replaceChildren();
-      searchHint.textContent = `${table} 桌共 ${names.length} 位賓客`;
+      const summary = summarizeAttendance(names);
+      const confirmedTotal = summary.adults + summary.children;
+      searchHint.textContent = `${table} 桌已回覆 ${confirmedTotal} 人（成人 ${summary.adults}、兒童 ${summary.children}），${summary.pending} 位待確認`;
       names.forEach(name => {
         const guest = { name, table };
         const button = document.createElement("button");
         button.className = "match-button";
         button.type = "button";
         button.dataset.name = name;
-        button.innerHTML = `<span>${name}</span><span class="match-table">${table} 桌</span>`;
-        button.addEventListener("click", () => showGuest(guest));
+        button.innerHTML = `<span>${name}</span><span class="match-details"><span class="match-table">${table} 桌</span><span class="match-count">${attendanceLabel(name)}</span></span>`;
+        button.addEventListener("click", () => {
+          activeGuest = guest;
+          showTable(guest.table, true);
+        });
         matchesElement.append(button);
       });
       const firstGuest = names.find(name => activeGuest?.name === name);
-      if (firstGuest) showGuest({ name: firstGuest, table });
+      if (firstGuest) showGuest({ name: firstGuest, table }, shouldScroll);
       else {
         activeGuest = null;
         resultElement.classList.remove("is-visible");
@@ -491,8 +569,11 @@
         button.className = "match-button";
         button.type = "button";
         button.dataset.name = guest.name;
-        button.innerHTML = `<span>${guest.name}</span><span class="match-table">${guest.table} 桌</span>`;
-        button.addEventListener("click", () => showGuest(guest));
+        button.innerHTML = `<span>${guest.name}</span><span class="match-details"><span class="match-table">${guest.table} 桌</span><span class="match-count">${attendanceLabel(guest.name)}</span></span>`;
+        button.addEventListener("click", () => {
+          activeGuest = guest;
+          showTable(guest.table, true);
+        });
         matchesElement.append(button);
       });
       if (found.length === 1) showGuest(found[0]);
