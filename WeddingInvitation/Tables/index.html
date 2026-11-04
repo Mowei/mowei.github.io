@@ -153,8 +153,9 @@
 
     .match-button:hover, .match-button[aria-current="true"] { border-color: var(--rose); background: #fbf2ef; }
 
-    .match-details { display: grid; justify-items: end; gap: 2px; }
+    .match-details { display: grid; justify-items: end; gap: 3px; max-width: 58%; text-align: right; }
     .match-table { color: var(--rose-deep); font-size: 12px; white-space: nowrap; }
+    .match-title { color: var(--rose-deep); font-size: 14px; font-weight: 600; line-height: 1.4; }
     .match-count { color: var(--muted); font-size: 11px; white-space: nowrap; }
 
     .empty-state {
@@ -177,8 +178,12 @@
 
     .result-name { margin: 0 0 4px; font-size: 20px; font-weight: 600; }
     .result-table { margin: 0; color: var(--rose-deep); font-size: 15px; }
+    .result-table-name { margin: 2px 0 0; color: var(--rose-deep); font-size: 18px; font-weight: 600; line-height: 1.45; }
     .result-attendance { margin: 6px 0 0; color: var(--ink); font-size: 13px; }
     .result-note { margin: 9px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+
+    .table-summary-name { display: block; margin-bottom: 3px; color: var(--rose-deep); font-size: 16px; font-weight: 600; line-height: 1.45; }
+    .table-summary-count { display: block; color: var(--muted); font-size: 12px; line-height: 1.5; }
 
     .legend {
       display: flex;
@@ -308,6 +313,7 @@
         <section class="result" id="result" aria-live="polite">
           <p class="result-name" id="result-name"></p>
           <p class="result-table" id="result-table"></p>
+          <p class="result-table-name" id="result-table-name"></p>
           <p class="result-attendance" id="result-attendance"></p>
           <p class="result-note">已在桌位圖標示桌位與建議路線，請從圖中央下方的入口通道前往。</p>
         </section>
@@ -352,6 +358,26 @@
       18: ["謝詔安", "林忠翰", "蔡宗儒", "張愷紘", "江治緯", "余冠儒", "江家志"],
       15: ["林宏道", "徐欣榆", "何恭穎", "賴威慎", "吳爵宏", "林信瀚", "黃彥碩"],
       17: ["李易霖", "李冠廷", "陳冠宇", "陳星孝", "侯佳佑"]
+    };
+    const tableNames = {
+      1: "主桌 曾欣相伴",
+      2: "男方親戚",
+      3: "男方親戚",
+      4: "浩瀚宇宙中的幸運",
+      5: "男方阿姨",
+      6: "男方親戚",
+      7: "醉愛妳們，無庸置疑",
+      8: "男方阿姨",
+      9: "男方阿姨",
+      10: "搶票靠這桌",
+      11: "新郎的後盾",
+      12: "新郎的靠山",
+      13: "超高校級的飯醉同夥",
+      14: "預備桌",
+      15: "財富自由俱樂部",
+      16: "天黑請閉眼",
+      17: "友誼不打烊",
+      18: "內科吃餅快樂夥伴"
     };
     const attendanceByName = {
       "曾宜唯": { adults: 1, children: 0 },
@@ -483,8 +509,8 @@
         marker.dataset.table = table;
         marker.setAttribute("role", "button");
         marker.setAttribute("tabindex", "0");
-        marker.setAttribute("aria-label", seating[table] ? `${table} 桌，查看賓客名單` : `${table} 桌，無提供名單`);
-        marker.innerHTML = `<circle cx="${x}" cy="${y}" r="24"></circle><text x="${x}" y="${y}">${table}</text>`;
+        marker.setAttribute("aria-label", seating[table] ? `${table} 桌，${tableNames[table]}，查看賓客名單` : `${table} 桌，${tableNames[table]}，無提供名單`);
+        marker.innerHTML = `<title>${table} 桌｜${tableNames[table]}</title><circle cx="${x}" cy="${y}" r="24"></circle><text x="${x}" y="${y}">${table}</text>`;
         marker.addEventListener("click", () => showTable(Number(table), false, true));
         marker.addEventListener("keydown", event => {
           if (event.key === "Enter" || event.key === " ") {
@@ -513,6 +539,7 @@
 
       document.querySelector("#result-name").textContent = guest.name;
       document.querySelector("#result-table").textContent = `${guest.table} 桌`;
+      document.querySelector("#result-table-name").textContent = tableNames[guest.table];
       const attendance = attendanceByName[guest.name];
       resultAttendanceElement.textContent = attendance
         ? `出席人數：成人 ${attendance.adults} 位、兒童 ${attendance.children} 位，共 ${attendance.adults + attendance.children} 位`
@@ -531,7 +558,7 @@
     function showTable(table, shouldScroll = false, scrollToMatches = false) {
       const names = seating[table];
       if (!names) {
-        searchHint.textContent = `${table} 桌目前沒有提供姓名名單`;
+        searchHint.innerHTML = `<span class="table-summary-name">${table} 桌｜${tableNames[table]}</span><span class="table-summary-count">目前沒有提供姓名名單</span>`;
         activeGuest = null;
         resultElement.classList.remove("is-visible");
         setActiveTable(table);
@@ -540,14 +567,14 @@
       matchesElement.replaceChildren();
       const summary = summarizeAttendance(names);
       const confirmedTotal = summary.adults + summary.children;
-      searchHint.textContent = `${table} 桌已回覆 ${confirmedTotal} 人（成人 ${summary.adults}、兒童 ${summary.children}），${summary.pending} 位待確認`;
+      searchHint.innerHTML = `<span class="table-summary-name">${table} 桌｜${tableNames[table]}</span><span class="table-summary-count">已回覆 ${confirmedTotal} 人（成人 ${summary.adults}、兒童 ${summary.children}），${summary.pending} 位待確認</span>`;
       names.forEach(name => {
         const guest = { name, table };
         const button = document.createElement("button");
         button.className = "match-button";
         button.type = "button";
         button.dataset.name = name;
-        button.innerHTML = `<span>${name}</span><span class="match-details"><span class="match-table">${table} 桌</span><span class="match-count">${attendanceLabel(name)}</span></span>`;
+        button.innerHTML = `<span>${name}</span><span class="match-details"><span class="match-table">${table} 桌</span><span class="match-title">${tableNames[table]}</span><span class="match-count">${attendanceLabel(name)}</span></span>`;
         button.addEventListener("click", () => {
           activeGuest = guest;
           showTable(guest.table, true);
@@ -590,7 +617,7 @@
         button.className = "match-button";
         button.type = "button";
         button.dataset.name = guest.name;
-        button.innerHTML = `<span>${guest.name}</span><span class="match-details"><span class="match-table">${guest.table} 桌</span><span class="match-count">${attendanceLabel(guest.name)}</span></span>`;
+        button.innerHTML = `<span>${guest.name}</span><span class="match-details"><span class="match-table">${guest.table} 桌</span><span class="match-title">${tableNames[guest.table]}</span><span class="match-count">${attendanceLabel(guest.name)}</span></span>`;
         button.addEventListener("click", () => {
           activeGuest = guest;
           showTable(guest.table, true);
