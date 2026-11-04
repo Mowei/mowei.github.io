@@ -275,6 +275,8 @@
       line-height: 1.6;
     }
 
+    .table-pdf a { color: var(--rose-deep); text-decoration: none;}
+
     @keyframes march { to { stroke-dashoffset: -26; } }
     @keyframes route-in { from { opacity: 0; } to { opacity: 1; } }
 
@@ -303,9 +305,10 @@
         <p class="event-meta">第一廳｜維多利亞廳</p>
       </div>
       <div class="masthead-note">願今天的相聚，成為往後的甜蜜回憶</div>
+      <div class="table-pdf eyebrow"><a href="桌位圖.pdf" target="_blank" rel="noopener noreferrer">開啟PDF</a></div>
     </header>
 
-    <section class="workspace" aria-label="座位查詢與位置圖">
+    <section class="workspace" aria-label="座位查詢與桌位圖">
       <aside class="search-panel">
         <p class="section-label">GUEST SEATING</p>
         <h2>輸入姓名查桌次</h2>
@@ -313,23 +316,23 @@
           <input id="guest-search" type="search" placeholder="請輸入姓名" autocomplete="off" aria-label="搜尋姓名">
           <button type="submit">搜尋</button>
         </form>
-        <p class="search-hint" id="search-hint" aria-live="polite">共 49 位賓客，輸入姓名即可查詢</p>
+        <p class="search-hint" id="search-hint" aria-live="polite">輸入姓名即可查詢</p>
         <div class="matches" id="matches" aria-live="polite"></div>
         <section class="result" id="result" aria-live="polite">
           <p class="result-name" id="result-name"></p>
           <p class="result-table" id="result-table"></p>
-          <p class="result-note">已在位置圖標示桌位與建議路線，請從圖中央下方的入口通道前往。</p>
+          <p class="result-note">已在桌位圖標示桌位與建議路線，請從圖中央下方的入口通道前往。</p>
         </section>
         <div class="legend"><span class="legend-line" aria-hidden="true"></span>由入口通道前往座位的建議路線</div>
       </aside>
 
       <section class="map-panel" aria-labelledby="map-title">
         <div class="map-heading">
-          <h2 id="map-title">宴會廳位置圖</h2>
+          <h2 id="map-title">宴會廳桌位圖</h2>
           <span>點選桌號也可查看名單</span>
         </div>
         <div class="map-frame" id="map-frame">
-          <img src="位置圖.png" alt="宴會廳桌次平面圖，中央下方為入口通道">
+          <img src="桌位圖.png" alt="宴會廳桌次平面圖，中央下方為入口通道">
           <svg class="map-overlay" viewBox="0 0 1000 1415" preserveAspectRatio="none" aria-label="桌次與引導路線">
             <path class="route" id="route" d=""></path>
             <circle class="entrance-dot" cx="610" cy="1325" r="13" aria-hidden="true"></circle>
