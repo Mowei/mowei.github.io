@@ -485,11 +485,11 @@
         marker.setAttribute("tabindex", "0");
         marker.setAttribute("aria-label", seating[table] ? `${table} 桌，查看賓客名單` : `${table} 桌，無提供名單`);
         marker.innerHTML = `<circle cx="${x}" cy="${y}" r="24"></circle><text x="${x}" y="${y}">${table}</text>`;
-        marker.addEventListener("click", () => showTable(Number(table)));
+        marker.addEventListener("click", () => showTable(Number(table), false, true));
         marker.addEventListener("keydown", event => {
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            showTable(Number(table));
+            showTable(Number(table), false, true);
           }
         });
         markerGroup.append(marker);
@@ -528,7 +528,7 @@
       });
     }
 
-    function showTable(table, shouldScroll = false) {
+    function showTable(table, shouldScroll = false, scrollToMatches = false) {
       const names = seating[table];
       if (!names) {
         searchHint.textContent = `${table} 桌目前沒有提供姓名名單`;
@@ -560,6 +560,10 @@
         activeGuest = null;
         resultElement.classList.remove("is-visible");
         setActiveTable(table);
+      }
+      if (scrollToMatches) {
+        const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+        matchesElement.scrollIntoView({ behavior, block: "start" });
       }
     }
 
